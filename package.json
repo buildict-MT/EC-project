@@ -9,7 +9,7 @@
     "server": "node server/index.js",
     "client": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "vitest run server/server.test.js",
     "eject": "react-scripts eject"
   },
   "dependencies": {
