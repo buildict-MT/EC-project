@@ -1,7 +1,7 @@
 {
   "name": "makerz-direct",
   "version": "1.0.0",
-  "description": "製造部品販売 EC サイト - MAKERZ Direct",
+  "description": "製造部品販売 EC サイト - RecruitDirect",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
