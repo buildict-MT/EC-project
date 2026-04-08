@@ -1,10 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.tsx';
-import { Trash2, FileText, ChevronRight, ShoppingBag } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.tsx';
+import { Trash2, FileText, ChevronRight, ShoppingBag, Send, CheckCircle } from 'lucide-react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 const CartPage: React.FC = () => {
   const { cart, removeFromCart, totalAmount, clearCart } = useCart();
+  const { user, token, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+
+  const handleCheckout = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          items: cart,
+          totalPrice: totalAmount
+        })
+      });
+
+      if (!response.ok) throw new Error('注文に失敗しました');
+
+      setOrderSuccess(true);
+      clearCart();
+      setTimeout(() => navigate('/account'), 3000);
+    } catch (err) {
+      alert('注文処理中にエラーが発生しました');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const generatePDF = async () => {
     const pdfDoc = await PDFDocument.create();
@@ -17,11 +55,11 @@ const CartPage: React.FC = () => {
     // ヘッダー
     page.drawText('ESTIMATE / QUOTATION', { x: 50, y: height - 50, size: 20, font, color: rgb(0, 0.2, 0.4) });
     page.drawText(`Date: ${new Date().toLocaleDateString()}`, { x: width - 150, y: height - 50, size: 10, font: normalFont });
-    page.drawText('MAKERZ DIRECT Online Store', { x: width - 150, y: height - 65, size: 10, font: normalFont });
+    page.drawText('RecruitDirect Online Store', { x: width - 150, y: height - 65, size: 10, font: normalFont });
 
     // 宛名
-    page.drawText('To: Valued Customer', { x: 50, y: height - 100, size: 12, font });
-    page.drawLine({ start: { x: 50, y: height - 105 }, end: { x: 200, y: height - 105 }, thickness: 1 });
+    page.drawText(`To: ${user?.company_name || 'Valued Customer'}`, { x: 50, y: height - 100, size: 12, font });
+    page.drawLine({ start: { x: 50, y: height - 105 }, end: { x: 250, y: height - 105 }, thickness: 1 });
 
     // 合計金額
     page.drawText(`Total Amount: JPY ${totalAmount.toLocaleString()} -`, { x: 50, y: height - 140, size: 14, font });
@@ -51,6 +89,16 @@ const CartPage: React.FC = () => {
     link.download = `Estimate_${new Date().getTime()}.pdf`;
     link.click();
   };
+
+  if (orderSuccess) {
+    return (
+      <div className="container" style={{ textAlign: 'center', padding: '100px 0' }}>
+        <CheckCircle size={64} color="#10b981" style={{ marginBottom: '20px' }} />
+        <h2 style={{ color: 'var(--primary-color)' }}>注文・申請が完了しました。</h2>
+        <p style={{ marginTop: '10px', color: '#666' }}>マイページよりステータスを確認いただけます。自動的にマイページへ移動します...</p>
+      </div>
+    );
+  }
 
   if (cart.length === 0) {
     return (
@@ -114,8 +162,13 @@ const CartPage: React.FC = () => {
               <span style={{ color: 'var(--primary-color)' }}>¥{totalAmount.toLocaleString()}</span>
             </div>
 
-            <button className="btn btn-accent" style={{ width: '100%', marginTop: '30px', fontSize: '18px' }}>
-              レジに進む <ChevronRight size={18} />
+            <button 
+              className="btn btn-accent" 
+              style={{ width: '100%', marginTop: '30px', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
+              onClick={handleCheckout}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? '処理中...' : user?.role === 'orderer' ? <><Send size={18} /> 承認を申請する</> : <><ChevronRight size={18} /> 注文を確定する</>}
             </button>
             
             <button 
@@ -128,7 +181,8 @@ const CartPage: React.FC = () => {
           </div>
           
           <p style={{ fontSize: '12px', color: '#666', marginTop: '20px', lineHeight: '1.4' }}>
-            ※見積書は正式な発注書としてご利用いただけます。銀行振込をご希望の場合は、見積書発行後に記載の口座へお振込みください。
+            ※B2Bアカウントの場合、発注担当者は承認者の確認が必要です。<br />
+            ※見積書は正式な発注書としてご利用いただけます。
           </p>
         </div>
       </div>

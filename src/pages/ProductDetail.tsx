@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShoppingCart, FileText, Download, Check } from 'lucide-react';
+import { ShoppingCart, FileText, Download, Check, Info } from 'lucide-react';
 import { useCart } from '../context/CartContext.tsx';
 
 interface Spec {
@@ -29,7 +29,9 @@ const ProductDetail: React.FC = () => {
   // シミュレーション用ステート
   const [selectedSpecs, setSelectedSpecs] = useState<{ [key: string]: Spec }>({});
   const [length, setLength] = useState(300); // ローラの長さ (mm)
+  const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [unitPrice, setUnitPrice] = useState(0);
 
   useEffect(() => {
     fetch(`/api/products/${id}`)
@@ -37,7 +39,6 @@ const ProductDetail: React.FC = () => {
       .then(data => {
         setProduct(data);
         setLoading(false);
-        // 初期選択
         const initial: { [key: string]: Spec } = {};
         data.specs.forEach((s: Spec) => {
           if (!initial[s.name]) initial[s.name] = s;
@@ -49,15 +50,21 @@ const ProductDetail: React.FC = () => {
 
   useEffect(() => {
     if (!product) return;
-    let price = product.base_price;
-    // 仕様による加算
+    let base = product.base_price;
     Object.values(selectedSpecs).forEach(s => {
-      price += s.price_modifier;
+      base += s.price_modifier;
     });
-    // 長さによる加算 (例: 100mm ごとに 500円)
-    price += Math.floor(length / 100) * 500;
-    setTotalPrice(price);
-  }, [product, selectedSpecs, length]);
+    base += Math.floor(length / 100) * 500;
+
+    // ボリュームディスカウント
+    let discount = 1.0;
+    if (quantity >= 50) discount = 0.90;
+    else if (quantity >= 10) discount = 0.95;
+
+    const calculatedUnitPrice = Math.round(base * discount);
+    setUnitPrice(calculatedUnitPrice);
+    setTotalPrice(calculatedUnitPrice * quantity);
+  }, [product, selectedSpecs, length, quantity]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -73,8 +80,8 @@ const ProductDetail: React.FC = () => {
       category: product.category,
       specs,
       length,
-      price: totalPrice,
-      quantity: 1
+      price: unitPrice,
+      quantity: quantity
     });
 
     setAdded(true);
@@ -91,23 +98,19 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-  // SVGプレビューの計算
-  const rollerWidth = 300 + (length / 5); // 描画上の幅
-  const rollerHeight = selectedSpecs['diameter']?.value === 'φ50' ? 60 : 40; // 描画上の高さ
+  const rollerWidth = 300 + (length / 5);
+  const rollerHeight = selectedSpecs['diameter']?.value === 'φ50' ? 60 : 40;
 
   return (
     <div className="container" style={{ margin: '60px auto' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '60px' }}>
         
-        {/* 左側: プレビューエリア */}
         <div>
           <div style={{ backgroundColor: '#f5f5f5', border: '1px solid #ddd', height: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
             <span style={{ position: 'absolute', top: '20px', left: '20px', fontSize: '12px', color: '#999', fontWeight: 'bold' }}>TECHNICAL PREVIEW</span>
             
             <svg width="100%" height="200" viewBox="0 0 800 200">
-              {/* シャフト */}
               <rect x={(800 - rollerWidth - 40) / 2} y="95" width={rollerWidth + 40} height="10" fill="#999" />
-              {/* ローラ本体 */}
               <rect 
                 x={(800 - rollerWidth) / 2} 
                 y={100 - rollerHeight / 2} 
@@ -117,8 +120,6 @@ const ProductDetail: React.FC = () => {
                 stroke="#666" 
                 strokeWidth="2"
               />
-              {/* 装飾ライン */}
-              <line x1={(800 - rollerWidth) / 2} y1="100" x2={(800 + rollerWidth) / 2} y2="100" stroke="rgba(255,255,255,0.3)" />
             </svg>
 
             <div style={{ marginTop: '20px', textAlign: 'center' }}>
@@ -138,14 +139,12 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* 右側: 選定・購入エリア */}
         <div>
           <span style={{ color: 'var(--primary-color)', fontWeight: 'bold', textTransform: 'uppercase', fontSize: '14px' }}>{product.category}</span>
           <h1 style={{ fontSize: '32px', margin: '10px 0 20px', color: 'var(--primary-color)' }}>{product.base_name}</h1>
           <p style={{ color: '#666', marginBottom: '30px' }}>{product.description}</p>
 
           <div style={{ borderTop: '1px solid #eee', paddingTop: '30px' }}>
-            {/* 仕様選定項目 */}
             <div style={{ marginBottom: '25px' }}>
               <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '10px', fontSize: '14px' }}>ローラ径</label>
               <select 
@@ -181,29 +180,36 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ marginBottom: '40px' }}>
+            <div style={{ marginBottom: '25px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                 <label style={{ fontWeight: 'bold', fontSize: '14px' }}>ローラ幅 (L)</label>
                 <span style={{ fontFamily: 'Roboto Mono', fontWeight: 'bold' }}>{length} mm</span>
               </div>
               <input 
-                type="range" 
-                min="100" 
-                max="2000" 
-                step="10" 
-                value={length} 
+                type="range" min="100" max="2000" step="10" value={length} 
                 onChange={(e) => setLength(parseInt(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--primary-color)' }}
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#999', marginTop: '5px' }}>
-                <span>100mm</span>
-                <span>2000mm</span>
-              </div>
             </div>
 
-            {/* 価格表示 & カート */}
+            <div style={{ marginBottom: '40px' }}>
+              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '10px', fontSize: '14px' }}>数量</label>
+              <input 
+                type="number" min="1" value={quantity} 
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                className="btn"
+                style={{ width: '100px', border: '1px solid #ddd', textAlign: 'center', backgroundColor: 'white' }}
+              />
+              {quantity >= 10 && (
+                <span style={{ marginLeft: '15px', color: '#10b981', fontSize: '14px', fontWeight: 'bold' }}>
+                   <Info size={14} style={{ verticalAlign: 'middle' }} /> {quantity >= 50 ? '10% OFF 適用中' : '5% OFF 適用中'}
+                </span>
+              )}
+            </div>
+
             <div style={{ backgroundColor: '#f9f9f9', padding: '30px', borderRadius: '4px', textAlign: 'right' }}>
-              <span style={{ fontSize: '14px', color: '#666' }}>参考価格 (税込)</span>
+              <div style={{ fontSize: '14px', color: '#666' }}>単価: ¥{unitPrice.toLocaleString()}</div>
+              <span style={{ fontSize: '14px', color: '#666' }}>合計金額 (税込)</span>
               <div style={{ fontSize: '36px', fontWeight: '900', color: 'var(--primary-color)', margin: '5px 0 20px' }}>
                 ¥{totalPrice.toLocaleString()}
               </div>
