@@ -6,6 +6,7 @@ import ProductDetail from './pages/ProductDetail.tsx';
 import CartPage from './pages/Cart.tsx';
 import Login from './pages/Login.tsx';
 import Account from './pages/Account.tsx';
+import Admin from './pages/Admin.tsx';
 import Header from './components/Header.tsx';
 import Footer from './components/Footer.tsx';
 import { CartProvider } from './context/CartContext.tsx';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
                 <Route path="/cart" element={<CartPage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/account" element={<Account />} />
+                <Route path="/admin" element={<Admin />} />
               </Routes>
             </main>
             <Footer />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, User, Search, LogIn } from 'lucide-react';
+import { ShoppingCart, User, Search, LogIn, ShieldAlert } from 'lucide-react';
 import { useCart } from '../context/CartContext.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 
@@ -8,6 +8,8 @@ const Header: React.FC = () => {
   const { cart } = useCart();
   const { user, isAuthenticated } = useAuth();
   
+  const isAdminOrApprover = user?.role === 'admin' || user?.role === 'approver';
+
   return (
     <header className="header">
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -16,7 +18,11 @@ const Header: React.FC = () => {
         <nav className="nav">
           <Link to="/" className="nav-link">トップ</Link>
           <Link to="/products" className="nav-link">商品一覧</Link>
-          <Link to="/simulator" className="nav-link">選定ツール</Link>
+          {isAdminOrApprover && (
+            <Link to="/admin" className="nav-link" style={{ color: 'var(--accent-color)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <ShieldAlert size={16} /> 管理パネル
+            </Link>
+          )}
           <Link to="/support" className="nav-link">サポート</Link>
         </nav>
 
@@ -26,7 +32,10 @@ const Header: React.FC = () => {
           {isAuthenticated ? (
             <Link to="/account" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'white' }}>
               <User size={20} className="text-light" />
-              <span style={{ fontSize: '14px' }}>{user?.email.split('@')[0]}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1' }}>
+                <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{user?.email.split('@')[0]}</span>
+                <span style={{ fontSize: '9px', opacity: '0.7', textTransform: 'uppercase' }}>{user?.role}</span>
+              </div>
             </Link>
           ) : (
             <Link to="/login" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'white' }}>
