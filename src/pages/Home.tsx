@@ -8,7 +8,7 @@ const Home: React.FC = () => {
       <section className="hero">
         <div className="container">
           <h1 className="hero-title">搬送を、変える。</h1>
-          <p className="hero-subtitle">精密なエンジニアリングと、信頼の品質。<br />MonoDirect が、あなたの現場を最適化します。</p>
+          <p className="hero-subtitle">精密なエンジニアリングと、信頼の品質。<br />RecruitDirect が、あなたの現場を最適化します。</p>
           <button className="btn btn-primary">製品カタログを見る</button>
         </div>
       </section>

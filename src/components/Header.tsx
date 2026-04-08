@@ -9,7 +9,7 @@ const Header: React.FC = () => {
   return (
     <header className="header">
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-        <Link to="/" className="logo">MonoDirect</Link>
+        <Link to="/" className="logo">RecruitDirect</Link>
         
         <nav className="nav">
           <Link to="/" className="nav-link">トップ</Link>

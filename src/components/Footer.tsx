@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
       <div className="container">
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px' }}>
           <div>
-            <h3 style={{ marginBottom: '20px' }}>MonoDirect</h3>
+            <h3 style={{ marginBottom: '20px' }}>RecruitDirect</h3>
             <p style={{ opacity: 0.8 }}>精密な搬送技術で、<br />モノづくりの未来を支える。</p>
           </div>
           <div>
@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
           </div>
         </div>
         <div style={{ marginTop: '60px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', textAlign: 'center', opacity: 0.5, fontSize: '12px' }}>
-          &copy; 2026 MonoDirect Corporation. All Rights Reserved.
+          &copy; 2026 RecruitDirect Corporation. All Rights Reserved.
         </div>
       </div>
     </footer>
