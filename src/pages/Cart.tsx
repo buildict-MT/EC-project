@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext.tsx';
-import { useAuth } from '../context/AuthContext.tsx';
+import { useCart, CartItem } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { Trash2, FileText, ChevronRight, ShoppingBag, Send, CheckCircle } from 'lucide-react';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 
 const CartPage: React.FC = () => {
   const { cart, removeFromCart, totalAmount, clearCart } = useCart();
@@ -46,39 +47,46 @@ const CartPage: React.FC = () => {
 
   const generatePDF = async () => {
     const pdfDoc = await PDFDocument.create();
+    pdfDoc.registerFontkit(fontkit);
     const page = pdfDoc.addPage([595.28, 841.89]); // A4
-    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const normalFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    
+    // 日本語フォントの読み込み (Noto Sans JP)
+    // 軽量化のため、実際のプロジェクトではフォントファイルをローカルに保持することを推奨します
+    const fontUrl = 'https://raw.githubusercontent.com/googlefonts/noto-cjk/main/Sans/SubsetOTF/JP/NotoSansJP-Regular.otf';
+    const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+    const japaneseFont = await pdfDoc.embedFont(fontBytes);
+    const japaneseFontBold = await pdfDoc.embedFont(fontBytes); // 今回は同じフォントを使用
 
     const { width, height } = page.getSize();
     
     // ヘッダー
-    page.drawText('ESTIMATE / QUOTATION', { x: 50, y: height - 50, size: 20, font, color: rgb(0, 0.2, 0.4) });
-    page.drawText(`Date: ${new Date().toLocaleDateString()}`, { x: width - 150, y: height - 50, size: 10, font: normalFont });
-    page.drawText('RecruitDirect Online Store', { x: width - 150, y: height - 65, size: 10, font: normalFont });
+    page.drawText('見積書 / ESTIMATE', { x: 50, y: height - 50, size: 20, font: japaneseFontBold, color: rgb(0, 0.2, 0.4) });
+    page.drawText(`発行日: ${new Date().toLocaleDateString()}`, { x: width - 150, y: height - 50, size: 10, font: japaneseFont });
+    page.drawText('RecruitDirect オンラインストア', { x: width - 150, y: height - 65, size: 10, font: japaneseFont });
 
     // 宛名
-    page.drawText(`To: ${user?.company_name || 'Valued Customer'}`, { x: 50, y: height - 100, size: 12, font });
+    page.drawText(`御中: ${user?.company_name || 'お客様'}`, { x: 50, y: height - 100, size: 12, font: japaneseFontBold });
     page.drawLine({ start: { x: 50, y: height - 105 }, end: { x: 250, y: height - 105 }, thickness: 1 });
 
     // 合計金額
-    page.drawText(`Total Amount: JPY ${totalAmount.toLocaleString()} -`, { x: 50, y: height - 140, size: 14, font });
+    page.drawText(`合計金額: ¥ ${totalAmount.toLocaleString()} (税込)`, { x: 50, y: height - 140, size: 14, font: japaneseFontBold });
 
     // テーブルヘッダー
     const tableTop = height - 180;
     page.drawRectangle({ x: 50, y: tableTop - 20, width: width - 100, height: 20, color: rgb(0.95, 0.95, 0.95) });
-    page.drawText('Item / Specifications', { x: 60, y: tableTop - 15, size: 10, font });
-    page.drawText('Qty', { x: 400, y: tableTop - 15, size: 10, font });
-    page.drawText('Price', { x: 500, y: tableTop - 15, size: 10, font });
+    page.drawText('商品名 / 仕様', { x: 60, y: tableTop - 15, size: 10, font: japaneseFontBold });
+    page.drawText('数量', { x: 400, y: tableTop - 15, size: 10, font: japaneseFontBold });
+    page.drawText('単価', { x: 500, y: tableTop - 15, size: 10, font: japaneseFontBold });
 
     // 明細
     let currentY = tableTop - 40;
-    cart.forEach((item) => {
+    cart.forEach((item: CartItem) => {
       const specStr = Object.entries(item.specs).map(([k, v]) => `${v}`).join(' ');
-      page.drawText(`${item.base_name} (${specStr} L${item.length})`, { x: 60, y: currentY, size: 9, font: normalFont });
-      page.drawText(item.quantity.toString(), { x: 400, y: currentY, size: 9, font: normalFont });
-      page.drawText(`YEN ${item.price.toLocaleString()}`, { x: 500, y: currentY, size: 9, font: normalFont });
-      currentY -= 20;
+      page.drawText(`${item.base_name}`, { x: 60, y: currentY, size: 9, font: japaneseFont });
+      page.drawText(`(${specStr} L${item.length}mm)`, { x: 60, y: currentY - 10, size: 8, font: japaneseFont, color: rgb(0.4, 0.4, 0.4) });
+      page.drawText(item.quantity.toString(), { x: 400, y: currentY, size: 9, font: japaneseFont });
+      page.drawText(`¥ ${item.price.toLocaleString()}`, { x: 500, y: currentY, size: 9, font: japaneseFont });
+      currentY -= 30;
     });
 
     const pdfBytes = await pdfDoc.save();
@@ -117,7 +125,7 @@ const CartPage: React.FC = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '40px' }}>
         {/* 左側: 商品リスト */}
         <div>
-          {cart.map((item) => (
+          {cart.map((item: CartItem) => (
             <div key={item.cartId} style={{ display: 'flex', gap: '20px', borderBottom: '1px solid #eee', paddingBottom: '20px', marginBottom: '20px' }}>
               <div style={{ width: '100px', height: '100px', backgroundColor: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#ccc' }}>
                 IMAGE

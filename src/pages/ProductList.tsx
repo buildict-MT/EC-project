@@ -42,7 +42,7 @@ const ProductList: React.FC = () => {
     setFilteredProducts(result);
   }, [selectedCategory, searchQuery, products]);
 
-  const categories = ['all', ...new Set(products.map(p => p.category))];
+  const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))];
 
   if (loading) return <div className="container" style={{ padding: '80px 0' }}>読み込み中...</div>;
 

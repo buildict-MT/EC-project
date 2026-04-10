@@ -69,6 +69,14 @@ async function createApp(dbPath = ':memory:') {
     });
   });
 
+  app.get('/api/auth/me', authenticateToken, (req, res) => {
+    db.get("SELECT u.id, u.email, u.role, c.name as company_name FROM users u JOIN companies c ON u.company_id = c.id WHERE u.id = ?", [req.user.id], (err, user) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      res.json(user);
+    });
+  });
+
   app.get('/api/products', (req, res) => {
     db.all("SELECT * FROM products", [], (err, rows) => {
       if (err) return res.status(500).json({ error: err.message });
@@ -96,7 +104,8 @@ async function createApp(dbPath = ':memory:') {
         const stmt = db.prepare(`INSERT INTO order_items (order_id, product_id, specs_json, quantity, unit_price) VALUES (?, ?, ?, ?, ?)`);
         if (items && Array.isArray(items)) {
           items.forEach(item => {
-            stmt.run(orderId, item.id, JSON.stringify(item.specs), item.quantity, item.price);
+            const specData = { ...item.specs, length: item.length };
+            stmt.run(orderId, item.id, JSON.stringify(specData), item.quantity, item.price);
           });
         }
         stmt.finalize();
@@ -112,11 +121,43 @@ async function createApp(dbPath = ':memory:') {
     });
   });
 
+  app.get('/api/orders/:id', authenticateToken, (req, res) => {
+    db.get("SELECT * FROM orders WHERE id = ? AND company_id = ?", [req.params.id, req.user.company_id], (err, order) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!order) return res.status(404).json({ error: 'Order not found' });
+      
+      db.all("SELECT oi.*, p.base_name, p.category FROM order_items oi JOIN products p ON oi.product_id = p.id WHERE oi.order_id = ?", [req.params.id], (err, items) => {
+        if (err) return res.status(500).json({ error: err.message });
+        const itemsWithParsedSpecs = items.map(item => ({
+          ...item,
+          specs: JSON.parse(item.specs_json)
+        }));
+        res.json({ ...order, items: itemsWithParsedSpecs });
+      });
+    });
+  });
+
   app.patch('/api/orders/:id/approve', authenticateToken, (req, res) => {
     if (req.user.role !== 'approver' && req.user.role !== 'admin') {
       return res.status(403).json({ error: '権限がありません' });
     }
     db.run("UPDATE orders SET status = 'approved' WHERE id = ? AND company_id = ?", [req.params.id, req.user.company_id], function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true });
+    });
+  });
+
+  app.patch('/api/orders/:id/status', authenticateToken, (req, res) => {
+    if (req.user.role !== 'approver' && req.user.role !== 'admin') {
+      return res.status(403).json({ error: '権限がありません' });
+    }
+    const { status } = req.body;
+    const validStatuses = ['pending_approval', 'approved', 'manufacturing', 'shipped', 'delivered', 'rejected'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: '無効なステータスです' });
+    }
+
+    db.run("UPDATE orders SET status = ? WHERE id = ? AND company_id = ?", [status, req.params.id, req.user.company_id], function(err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true });
     });

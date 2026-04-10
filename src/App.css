@@ -194,8 +194,15 @@ a {
   }
 
   /* カート・詳細画面のグリッド調整 */
-  div[style*="grid-template-columns"] {
+  .container > div[style*="grid-template-columns"] {
     grid-template-columns: 1fr !important;
+    gap: 30px !important;
+  }
+
+  /* 注文詳細画面のプログレスバー調整 */
+  .container > div > div[style*="display: flex"] > div[style*="width: 20%"] {
+    width: auto !important;
+    flex: 1;
   }
 }
 
@@ -218,4 +225,15 @@ a {
   color: var(--white);
   padding: 60px 0;
   margin-top: 80px;
+}
+
+.footer-link {
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.3s;
+  font-size: 14px;
+}
+
+.footer-link:hover {
+  color: var(--white);
+  text-decoration: underline;
 }

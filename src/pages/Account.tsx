@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext.tsx';
-import { History, Package, Clock, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { History, Package, Clock, CheckCircle, AlertCircle, ExternalLink, RefreshCw } from 'lucide-react';
 
 interface Order {
   id: number;
@@ -36,7 +37,13 @@ const Account: React.FC = () => {
       case 'pending_approval':
         return { label: '承認待ち', color: '#f59e0b', icon: <Clock size={16} /> };
       case 'approved':
-        return { label: '承認済', color: '#10b981', icon: <CheckCircle size={16} /> };
+        return { label: '承認済', color: 'var(--primary-color)', icon: <CheckCircle size={16} /> };
+      case 'manufacturing':
+        return { label: '製造中', color: 'var(--primary-color)', icon: <RefreshCw size={16} /> };
+      case 'shipped':
+        return { label: '出荷済', color: 'var(--primary-color)', icon: <Package size={16} /> };
+      case 'delivered':
+        return { label: '配送完了', color: '#10b981', icon: <CheckCircle size={16} /> };
       case 'rejected':
         return { label: '却下', color: '#ef4444', icon: <AlertCircle size={16} /> };
       default:
@@ -105,9 +112,9 @@ const Account: React.FC = () => {
                         {status.icon}
                         {status.label}
                       </div>
-                      <button className="btn" style={{ padding: '8px 12px', border: '1px solid #ddd', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px' }}>
+                      <Link to={`/orders/${order.id}`} className="btn" style={{ padding: '8px 12px', border: '1px solid #ddd', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', textDecoration: 'none', color: 'inherit' }}>
                         詳細を表示 <ExternalLink size={14} />
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 );

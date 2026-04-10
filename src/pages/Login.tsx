@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.tsx';
+import { useAuth } from '../context/AuthContext';
 import { LogIn, Mail, Lock } from 'lucide-react';
 
 const Login: React.FC = () => {

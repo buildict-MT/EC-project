@@ -2,6 +2,7 @@
   "name": "makerz-direct",
   "version": "1.0.0",
   "description": "製造部品販売 EC サイト - RecruitDirect",
+  "proxy": "http://localhost:5000",
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
@@ -13,6 +14,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "bcryptjs": "^3.0.3",
     "concurrently": "^8.2.0",
     "cors": "^2.8.6",

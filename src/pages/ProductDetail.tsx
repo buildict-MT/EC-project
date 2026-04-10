@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ShoppingCart, FileText, Download, Check, Info } from 'lucide-react';
-import { useCart } from '../context/CartContext.tsx';
+import { useCart } from '../context/CartContext';
 
 interface Spec {
   id: number;
@@ -88,6 +88,59 @@ const ProductDetail: React.FC = () => {
     setTimeout(() => setAdded(false), 2000);
   };
 
+  const handleDownloadCAD = () => {
+    if (!product) return;
+    
+    const dia = selectedSpecs['diameter']?.value || '30';
+    const mat = selectedSpecs['material']?.value || 'ST';
+    
+    // 簡易的な DXF テキストデータの生成
+    const dxfContent = `0
+SECTION
+2
+ENTITIES
+0
+CIRCLE
+8
+0
+10
+0.0
+20
+0.0
+30
+0.0
+40
+${parseInt(dia.replace('φ', '')) / 2}
+0
+LINE
+8
+0
+10
+0.0
+20
+0.0
+30
+0.0
+11
+${length}
+21
+0.0
+31
+0.0
+0
+ENDSEC
+0
+EOF`;
+
+    const blob = new Blob([dxfContent], { type: 'application/dxf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${product.base_name}_${dia}_L${length}.dxf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) return <div className="container" style={{ padding: '80px 0' }}>読み込み中...</div>;
   if (!product) return <div className="container">商品が見つかりません。</div>;
 
@@ -130,7 +183,11 @@ const ProductDetail: React.FC = () => {
           </div>
           
           <div style={{ marginTop: '20px', display: 'flex', gap: '15px' }}>
-            <button className="btn" style={{ flex: 1, border: '1px solid var(--primary-color)', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <button 
+              className="btn" 
+              style={{ flex: 1, border: '1px solid var(--primary-color)', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              onClick={handleDownloadCAD}
+            >
               <Download size={18} /> CADデータ(DXF)
             </button>
             <button className="btn" style={{ flex: 1, border: '1px solid var(--primary-color)', color: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>

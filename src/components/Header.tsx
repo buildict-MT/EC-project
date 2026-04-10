@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, User, Search, LogIn, ShieldAlert } from 'lucide-react';
-import { useCart } from '../context/CartContext.tsx';
-import { useAuth } from '../context/AuthContext.tsx';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const Header: React.FC = () => {
   const { cart } = useCart();
