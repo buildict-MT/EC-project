@@ -3,11 +3,13 @@ import { Target, Award, MapPin, Calendar, Building2, Globe, Users } from 'lucide
 
 const About: React.FC = () => {
   const history = [
-    { year: '2010年 4月', event: 'RecruitDirect 株式会社設立（東京都港区）' },
-    { year: '2013年 8月', event: '製造部品 B2B プラットフォーム「RecruitDirect」β版を公開' },
+    { year: '2010年 4月', event: 'MakerDirect 株式会社設立（兵庫県神戸市）' },
+    { year: '2013年 8月', event: '製造部品 B2B プラットフォーム「MakerDirect」β版を公開' },
     { year: '2016年 3月', event: 'CADデータ自動生成エンジンの独自開発に成功' },
+    { year: '2019年 4月', event: 'RecruitDirect 株式会社に会社名を変更' },
     { year: '2019年11月', event: '導入企業数が 500社を突破' },
     { year: '2023年 6月', event: '次世代物流自動化ソリューション部門を新設' },
+    { year: '2023年11月', event: '次世代物流自動化プラットフォーム「Direct-Logistics」サービス開始' },
     { year: '2025年 1月', event: '導入企業数が 1,200社を突破' }
   ];
 
@@ -49,10 +51,10 @@ const About: React.FC = () => {
           {[
             { label: '会社名', value: 'RecruitDirect 株式会社 (RecruitDirect Corporation)', icon: <Building2 size={18} /> },
             { label: '設立', value: '2010年 4月 1日', icon: <Calendar size={18} /> },
-            { label: '資本金', value: '5億 8,000万円', icon: <Award size={18} /> },
+            { label: '資本金', value: '50億円（資本準備金含む）', icon: <Award size={18} /> },
             { label: '所在地', value: '〒650-0042 兵庫県神戸市中央区波止場町 5-4 KOBEビル', icon: <MapPin size={18} /> },
             { label: '代表者', value: <>{'代表取締役社長　田中 工'}<br />{'取締役　松本智紀'}<br />{'取締役　佐藤 健太'}</>, icon: <Users size={18} /> },
-            { label: '従業員数', value: '120名（パート・アルバイト含む）', icon: <Users size={18} /> },
+            { label: '従業員数', value: '1,000名以上（グループ全体・パート・アルバイト含む）', icon: <Users size={18} /> },
             { label: '事業内容', value: '製造部品 B2B EC サイトの運営、設計支援ツールの開発、物流コンサルティング', icon: <Target size={18} /> }
           ].map((item, index) => (
             <div key={index} style={{ display: 'grid', gridTemplateColumns: '250px 1fr', backgroundColor: 'white' }}>

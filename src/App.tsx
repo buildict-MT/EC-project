@@ -18,6 +18,7 @@ import DeliveryTime from './pages/DeliveryTime';
 import Contact from './pages/Contact';
 import JobApplication from './pages/JobApplication';
 import CasualInterview from './pages/CasualInterview';
+import GettingStarted from './pages/GettingStarted';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { CartProvider } from './context/CartContext';
@@ -67,6 +68,7 @@ const App: React.FC = () => {
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/careers/apply" element={<JobApplication />} />
                 <Route path="/careers/casual" element={<CasualInterview />} />
+                <Route path="/getting-started" element={<GettingStarted />} />
                 <Route path="/privacy" element={<EnvironmentalPolicy />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

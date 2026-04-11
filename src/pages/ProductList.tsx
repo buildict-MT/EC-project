@@ -44,6 +44,18 @@ const ProductList: React.FC = () => {
 
   const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))];
 
+  const categoryNames: { [key: string]: string } = {
+    'all': '全カテゴリー',
+    'roller': 'コンベアローラ',
+    'coupling': 'カップリング',
+    'gear': 'ギヤ・歯車',
+    'motor': 'モータ・駆動',
+    'bearing': 'ベアリング',
+    'sensor': 'センサ',
+    'frame': 'アルミフレーム',
+    'belt': '搬送ベルト'
+  };
+
   if (loading) return <div className="container" style={{ padding: '80px 0' }}>読み込み中...</div>;
 
   return (
@@ -87,7 +99,7 @@ const ProductList: React.FC = () => {
                     fontWeight: selectedCategory === cat ? 'bold' : 'normal'
                   }}
                 >
-                  {cat === 'all' ? '全カテゴリー' : cat}
+                  {categoryNames[cat] || cat}
                 </button>
               ))}
             </div>

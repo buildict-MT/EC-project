@@ -89,7 +89,7 @@ const Home: React.FC = () => {
       <section style={{ padding: '80px 0', textAlign: 'center' }}>
         <div className="container">
           <h2 style={{ fontSize: '28px', marginBottom: '30px' }}>あなたの現場を、RecruitDirect で最適化しませんか？</h2>
-          <Link to="/products" className="btn btn-primary" style={{ padding: '15px 50px', fontSize: '18px' }}>
+          <Link to="/getting-started" className="btn btn-primary" style={{ padding: '15px 50px', fontSize: '18px' }}>
             今すぐ無料選定を始める
           </Link>
         </div>
