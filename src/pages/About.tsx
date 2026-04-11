@@ -51,10 +51,10 @@ const About: React.FC = () => {
           {[
             { label: '会社名', value: 'RecruitDirect 株式会社 (RecruitDirect Corporation)', icon: <Building2 size={18} /> },
             { label: '設立', value: '2010年 4月 1日', icon: <Calendar size={18} /> },
-            { label: '資本金', value: '50億円（資本準備金含む）', icon: <Award size={18} /> },
+            { label: '資本金', value: '1億円', icon: <Award size={18} /> },
             { label: '所在地', value: '〒650-0042 兵庫県神戸市中央区波止場町 5-4 KOBEビル', icon: <MapPin size={18} /> },
             { label: '代表者', value: <>{'代表取締役社長　田中 工'}<br />{'取締役　松本智紀'}<br />{'取締役　佐藤 健太'}</>, icon: <Users size={18} /> },
-            { label: '従業員数', value: '1,000名以上（グループ全体・パート・アルバイト含む）', icon: <Users size={18} /> },
+            { label: '従業員数', value: '220名（グループ全体・パート・アルバイト含む）', icon: <Users size={18} /> },
             { label: '事業内容', value: '製造部品 B2B EC サイトの運営、設計支援ツールの開発、物流コンサルティング', icon: <Target size={18} /> }
           ].map((item, index) => (
             <div key={index} style={{ display: 'grid', gridTemplateColumns: '250px 1fr', backgroundColor: 'white' }}>
